@@ -1,0 +1,17 @@
+#!/usr/bin/env php
+<?php
+
+define('BASE_DIR', __DIR__);
+
+require_once 'vendor/autoload.php';
+
+use SalesTaxesTool\Exceptions\GeneratorException;
+use SalesTaxesTool\Cli\Console;
+
+// Init Console tool
+$cli = new Console();
+
+// Read argv params
+$input    = $cli['input'];
+
+echo 'You selected input: ', $input;
