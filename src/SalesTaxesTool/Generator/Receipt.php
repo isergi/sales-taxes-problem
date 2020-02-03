@@ -58,13 +58,16 @@ class Receipt implements iGenerator
      * Write data about cities into a new sitemap file.
      * Write data about activities into a new sitemap file.
      * 
+     * @param bool     $isPrint should generator prints result or just return
+     * 
      * @return iGenerator
      * 
      * @throws GeneratorException  if unable to write a data into the file
      */
-    public function generate() : iGenerator
+    public function generate(bool $isPrint = true) : string
     {
 
+        $receipt     = '';
         $salesTaxes  = 0;
         $total       = 0;
 
@@ -87,14 +90,22 @@ class Receipt implements iGenerator
             $calculatedPrice     += $productSalesTaxes;
             $total               += $calculatedPrice;
 
-            echo $cartItem['qty'], ' ', $cartItem['product']->name, ': ', $this->_getPriceFormat($cartItem['product']->price, false), ':', $this->_getPriceFormat($calculatedPrice), PHP_EOL;
+            $receipt .= $cartItem['qty'] . ' ' . 
+                        $cartItem['product']->name . ': ' . 
+                        $this->_getPriceFormat($cartItem['product']->price, false) . ':' . 
+                        $this->_getPriceFormat($calculatedPrice) . 
+                        PHP_EOL;
         }
 
-        // Print out finilazed data
-        echo 'Sales Taxes: ', $this->_getPriceFormat($salesTaxes), PHP_EOL,
-             'Total: ', $this->_getPriceFormat($total), PHP_EOL;
+        // Finilaze total data
+        $receipt .= 'Sales Taxes: ' . $this->_getPriceFormat($salesTaxes) . PHP_EOL .
+                    'Total: ' . $this->_getPriceFormat($total) . PHP_EOL;
 
-        return $this;
+        if ($isPrint) {
+            echo $receipt;
+        }
+
+        return $receipt;
     }
 
     /**

@@ -8,6 +8,7 @@ require_once 'vendor/autoload.php';
 use SalesTaxesTool\Exceptions\GeneratorException;
 use SalesTaxesTool\Exceptions\ProductException;
 use SalesTaxesTool\Exceptions\SalesTaxesException;
+use SalesTaxesTool\Exceptions\TaxException;
 use SalesTaxesTool\Generator\Receipt;
 use SalesTaxesTool\Cli\Console;
 use SalesTaxesTool\Tax\RevivaTax;
@@ -28,10 +29,14 @@ if (!file_exists(INPUT_FILE)) {
 }
 
 // Init receipt generator
-$receipt = new Receipt(INPUT_FILE);
+$receipt = new Receipt();
 
 // Init Tax from a config file
-$taxes = new RevivaTax(BASE_DIR . '/config/taxes.config.json');
+try {
+    $taxes = new RevivaTax(BASE_DIR . '/config/taxes.con3fig.json');
+} catch (TaxException $e){
+    $cli->error($e);
+}
 
 // Set taxes for receipt generator
 $receipt->setTax($taxes);
@@ -39,7 +44,7 @@ $receipt->setTax($taxes);
 // Reads product from a virtual cart
 $inputFileHandle = fopen(INPUT_FILE, 'r');
 if ($inputFileHandle === false) {
-    $e = new SalesTaxesException('Unable to open sitemap file "' . INPUT_FILE . '"', SalesTaxesException::ERROR_CODE_OPEN_INPUT_FILE);
+    $e = new SalesTaxesException('Unable to open input file "' . INPUT_FILE . '"', SalesTaxesException::ERROR_CODE_OPEN_INPUT_FILE);
     $cli->error($e);
 }
 

@@ -1,0 +1,13 @@
+{
+    "default" : {
+        "rate" : 10,
+        "exclude" : [
+            "books",
+            "food",
+            "medical"
+        ]
+    },
+    "imported" : {
+        "rate"  : 5
+    }
+}

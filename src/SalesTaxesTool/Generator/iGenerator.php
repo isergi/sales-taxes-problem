@@ -19,5 +19,5 @@ interface iGenerator
      * 
      * @return iGenerator
      */
-    public function generate() : iGenerator;
+    public function generate(bool $isPrint = true) : string;
 }

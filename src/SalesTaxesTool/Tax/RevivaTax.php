@@ -2,7 +2,7 @@
 
 namespace SalesTaxesTool\Tax;
 
-use  SalesTaxesTool\Excpeptions\TaxExcpeption;
+use  SalesTaxesTool\Exceptions\TaxException;
 
 class RevivaTax implements iTax
 {
