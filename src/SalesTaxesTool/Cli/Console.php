@@ -17,6 +17,8 @@ class Console extends \Commando\Command
         $this->setHelp(
             '      A simple tool that prints out the receipt details' . 
             PHP_EOL . PHP_EOL . PHP_EOL .
+            'USAGE: ' . 
+            PHP_EOL . PHP_EOL . '      ./sales-taxes-tool -i [file ..] print out the receipt' . PHP_EOL . 
             'OPTIONS:'
         );
         

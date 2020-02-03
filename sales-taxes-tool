@@ -33,7 +33,7 @@ $receipt = new Receipt();
 
 // Init Tax from a config file
 try {
-    $taxes = new RevivaTax(BASE_DIR . '/config/taxes.con3fig.json');
+    $taxes = new RevivaTax(BASE_DIR . '/config/taxes.config.json');
 } catch (TaxException $e){
     $cli->error($e);
 }
