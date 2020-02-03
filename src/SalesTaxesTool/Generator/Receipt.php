@@ -65,26 +65,47 @@ class Receipt implements iGenerator
     public function generate() : iGenerator
     {
 
-        $salesTaxes  = '';
+        $salesTaxes  = 0;
         $total       = 0;
 
+        // Check if Receipt has attached taxes
         if (is_null($this->_tax)) {
             throw new GeneratorException('Tax for Receipt not implemented', GeneratorException::ERROR_CODE_NO_IMPLEMENTED_TAX);
         }
 
+        // Check if Receipt has products
         if (empty($this->_cart)) {
             throw new GeneratorException('Products for Receipt not implemented', GeneratorException::ERROR_CODE_NO_IMPLEMENTED_PRODUCTS);
         }
 
+        // Calculate total prices and taxes
         foreach ($this->_cart as $cartItem) {
-            $total += $cartItem['product']->price;
-            echo $cartItem['qty'], ' ', $cartItem['product']->name, ': ', $cartItem['product']->price, PHP_EOL;
-            $salesTaxes .= '__' . $this->_tax->getRate($cartItem['product']->getProductCategory(), $cartItem['product']->is_imported);
+            $calculatedPrice     = $cartItem['product']->price * $cartItem['qty'];
+            $productTaxRate      = ($this->_tax->getRate($cartItem['product']->getProductCategory(), $cartItem['product']->is_imported));
+            $productSalesTaxes   = round(($calculatedPrice * $productTaxRate / 100), 2);
+            $salesTaxes          += $productSalesTaxes;
+            $calculatedPrice     += $productSalesTaxes;
+            $total               += $calculatedPrice;
+
+            echo $cartItem['qty'], ' ', $cartItem['product']->name, ': ', $this->_getPriceFormat($cartItem['product']->price, false), ':', $this->_getPriceFormat($calculatedPrice), PHP_EOL;
         }
 
-        echo 'Sales Taxes: ', $salesTaxes, PHP_EOL,
-             'Total: ', $total, PHP_EOL;
+        // Print out finilazed data
+        echo 'Sales Taxes: ', $this->_getPriceFormat($salesTaxes), PHP_EOL,
+             'Total: ', $this->_getPriceFormat($total), PHP_EOL;
 
         return $this;
+    }
+
+    /**
+     * Gets price format for a receipt
+     * 
+     * @param float          $price number that shold be modified to the price format
+     * 
+     * @return float
+     */
+    private function _getPriceFormat(float $price) : string
+    {
+        return (string)number_format((float)$price, 2, '.', '');
     }
 }

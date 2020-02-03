@@ -14,7 +14,7 @@ use SalesTaxesTool\Tax\RevivaTax;
 use SalesTaxesTool\Product\Product;
 
 // Defile separator of lines in a virtual cart file
-define('CSV_DELIMITER', ',');
+define('CSV_DELIMITER', ';');
 
 // Init Console tool
 $cli = new Console();
@@ -49,7 +49,7 @@ while (($data = fgetcsv($inputFileHandle, 1000, CSV_DELIMITER)) !== FALSE) {
      * @TODO: Dirty hack!! Should be removed in real life. And should be keeping in database storage.
      *        And should be as a property of a product. Not a check on a word 'imported'. 
      * */ 
-    $isImported = (bool)strpos($data[1], 'imported');
+    $isImported = (bool)strpos(' ' . $data[1], 'imported');
 
     try {
         $receipt->addProduct(new Product($data[1], $data[2], $isImported), $data[0]);

@@ -7,7 +7,7 @@ namespace SalesTaxesTool\Product;
  */
 class Category
 {
-    const CATEGORY_NAME_BOOK     = 'book',
+    const CATEGORY_NAME_BOOK     = 'books',
           CATEGORY_NAME_FOOD     = 'food',
           CATEGORY_NAME_PERFUME  = 'perfume',
           CATEGORY_NAME_MEDICAL  = 'medical',
@@ -26,7 +26,7 @@ class Category
         'imported box of chocolates' => self::CATEGORY_NAME_FOOD,
         'imported bottle of perfume' => self::CATEGORY_NAME_PERFUME,
         'bottle of perfume'          => self::CATEGORY_NAME_PERFUME,
-        'packet of headache pills'   => self::CATEGORY_NAME_PERFUME,
+        'packet of headache pills'   => self::CATEGORY_NAME_MEDICAL,
         'box of imported chocolates' => self::CATEGORY_NAME_FOOD,
     ];
 }
