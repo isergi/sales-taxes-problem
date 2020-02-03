@@ -6,12 +6,58 @@ define('BASE_DIR', __DIR__);
 require_once 'vendor/autoload.php';
 
 use SalesTaxesTool\Exceptions\GeneratorException;
+use SalesTaxesTool\Exceptions\SalesTaxesException;
+use SalesTaxesTool\Generator\Receipt;
 use SalesTaxesTool\Cli\Console;
+use SalesTaxesTool\Tax\RevivaTax;
+use SalesTaxesTool\Product\Product;
+
+// Defile separator of lines in a virtual cart file
+define('CSV_DELIMITER', ',');
 
 // Init Console tool
 $cli = new Console();
 
-// Read argv params
-$input    = $cli['input'];
+// Read argv params and set input file with a product list
+define('INPUT_FILE', $cli['input']);
 
-echo 'You selected input: ', $input;
+if (!file_exists(INPUT_FILE)) {
+    $e = new SalesTaxesException('Unable to open sitemap file "' . INPUT_FILE . '"', 404);
+    $cli->error($e);
+}
+
+// Init Tax from a config file
+$taxes = new RevivaTax(BASE_DIR . '/config/taxes.config.json');
+
+// Init receipt generator
+$receipt = new Receipt(INPUT_FILE);
+
+// Set taxes for receipt generator
+$receipt->setTax($taxes);
+
+// Reads product from a virtual cart
+$inputFileHandle = fopen(INPUT_FILE, 'r');
+if ($inputFileHandle === false) {
+    $e = new SalesTaxesException('Unable to open sitemap file "' . INPUT_FILE . '"', 403);
+    $cli->error($e);
+}
+
+while (($data = fgetcsv($inputFileHandle, 1000, CSV_DELIMITER)) !== FALSE) {
+
+    /**
+     * @TODO: Dirty hack!! Should be removed in real life. And should be keeping in database storage.
+     *        And should be as a property of a product. Not a check on a word 'imported'. 
+     * */ 
+    $isImported = (bool)strpos($data[1], 'sic');
+
+    $receipt->addProduct(new Product($data[1], $data[2], $isImported), $data[0]);
+}
+
+fclose($inputFileHandle);
+
+// Generate and print out receipt
+try {
+    $receipt->generate();
+} catch (GeneratorException $e){
+    $cli->error($e);
+}
