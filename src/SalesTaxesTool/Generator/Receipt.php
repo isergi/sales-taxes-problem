@@ -14,18 +14,6 @@ use SalesTaxesTool\Product\aProduct;
  */
 class Receipt implements iGenerator
 {
-
-    /**
-     * Return this code error when ubable to continiue create receipt because products was not implemented
-     */
-    const ERROR_CODE_NO_IMPLEMENTED_PRODUCTS = 120;
-
-    /**
-     * Return this code error when ubable to continiue create receipt because tax was not implemented
-     */
-    const ERROR_CODE_NO_IMPLEMENTED_TAX = 121;
-
-
     /**
      * Collected products data in cart
      */
@@ -77,19 +65,25 @@ class Receipt implements iGenerator
     public function generate() : iGenerator
     {
 
+        $salesTaxes  = '';
+        $total       = 0;
+
         if (is_null($this->_tax)) {
-            throw new GeneratorException('Tax for Receipt not implemented', self::ERROR_CODE_NO_IMPLEMENTED_TAX);
+            throw new GeneratorException('Tax for Receipt not implemented', GeneratorException::ERROR_CODE_NO_IMPLEMENTED_TAX);
         }
 
         if (empty($this->_cart)) {
-            throw new GeneratorException('Products for Receipt not implemented', self::ERROR_CODE_NO_IMPLEMENTED_PRODUCTS);
+            throw new GeneratorException('Products for Receipt not implemented', GeneratorException::ERROR_CODE_NO_IMPLEMENTED_PRODUCTS);
         }
-
-        print_r($this->_cart);
 
         foreach ($this->_cart as $cartItem) {
-            echo $this->_tax->getRate($cartItem['product']->name, false);
+            $total += $cartItem['product']->price;
+            echo $cartItem['qty'], ' ', $cartItem['product']->name, ': ', $cartItem['product']->price, PHP_EOL;
+            $salesTaxes .= '__' . $this->_tax->getRate($cartItem['product']->getProductCategory(), $cartItem['product']->is_imported);
         }
+
+        echo 'Sales Taxes: ', $salesTaxes, PHP_EOL,
+             'Total: ', $total, PHP_EOL;
 
         return $this;
     }

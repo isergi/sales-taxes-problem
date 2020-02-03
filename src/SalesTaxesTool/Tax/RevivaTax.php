@@ -8,11 +8,6 @@ class RevivaTax implements iTax
 {
 
     /**
-     * Return this code error when ubable to create a hande to the sitemap file
-     */
-    const ERROR_CODE_UNABLE_OPEN_FILE = 210;
-
-    /**
      * Config for tax
      * Structure:
      *     [default] => Array
@@ -40,7 +35,7 @@ class RevivaTax implements iTax
     public function __construct(string $fileName)
     {
         if (!file_exists($fileName)) {
-            throw new TaxException('Unable to open config file for tax "' . $fileName . '"', self::ERROR_CODE_UNABLE_OPEN_FILE);
+            throw new TaxException('Unable to open config file for tax "' . $fileName . '"', TaxException::ERROR_CODE_UNABLE_TO_FIND_FILE);
         }
         $this->_config = json_decode(file_get_contents($fileName), true);
     }
@@ -50,14 +45,14 @@ class RevivaTax implements iTax
      * 
      * @return float
      */
-    public function getRate(string $productType, $isImported = false) : int
+    public function getRate(string $productCategory, $isImported = false) : int
     {
-        $rate = 0;
+        $rate = (in_array($productCategory, $this->_config['default']['exclude'])) ? 0 : $this->_config['default']['rate'];
 
-        if (in_array($productType, $this->_config['default']['exclude'])) {
-            ;
+        if ($isImported) {
+            $rate += $this->_config['imported']['rate'];
         }
-
-        return 10;
+        
+        return $rate;
     }
 }

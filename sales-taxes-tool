@@ -6,6 +6,7 @@ define('BASE_DIR', __DIR__);
 require_once 'vendor/autoload.php';
 
 use SalesTaxesTool\Exceptions\GeneratorException;
+use SalesTaxesTool\Exceptions\ProductException;
 use SalesTaxesTool\Exceptions\SalesTaxesException;
 use SalesTaxesTool\Generator\Receipt;
 use SalesTaxesTool\Cli\Console;
@@ -22,15 +23,15 @@ $cli = new Console();
 define('INPUT_FILE', $cli['input']);
 
 if (!file_exists(INPUT_FILE)) {
-    $e = new SalesTaxesException('Unable to open sitemap file "' . INPUT_FILE . '"', 404);
+    $e = new SalesTaxesException('Unable to open input file "' . INPUT_FILE . '"', SalesTaxesException::ERROR_CODE_FIND_INPUT_FILE);
     $cli->error($e);
 }
 
-// Init Tax from a config file
-$taxes = new RevivaTax(BASE_DIR . '/config/taxes.config.json');
-
 // Init receipt generator
 $receipt = new Receipt(INPUT_FILE);
+
+// Init Tax from a config file
+$taxes = new RevivaTax(BASE_DIR . '/config/taxes.config.json');
 
 // Set taxes for receipt generator
 $receipt->setTax($taxes);
@@ -38,7 +39,7 @@ $receipt->setTax($taxes);
 // Reads product from a virtual cart
 $inputFileHandle = fopen(INPUT_FILE, 'r');
 if ($inputFileHandle === false) {
-    $e = new SalesTaxesException('Unable to open sitemap file "' . INPUT_FILE . '"', 403);
+    $e = new SalesTaxesException('Unable to open sitemap file "' . INPUT_FILE . '"', SalesTaxesException::ERROR_CODE_OPEN_INPUT_FILE);
     $cli->error($e);
 }
 
@@ -48,9 +49,13 @@ while (($data = fgetcsv($inputFileHandle, 1000, CSV_DELIMITER)) !== FALSE) {
      * @TODO: Dirty hack!! Should be removed in real life. And should be keeping in database storage.
      *        And should be as a property of a product. Not a check on a word 'imported'. 
      * */ 
-    $isImported = (bool)strpos($data[1], 'sic');
+    $isImported = (bool)strpos($data[1], 'imported');
 
-    $receipt->addProduct(new Product($data[1], $data[2], $isImported), $data[0]);
+    try {
+        $receipt->addProduct(new Product($data[1], $data[2], $isImported), $data[0]);
+    } catch (ProductException $e){
+        $cli->error($e);
+    }
 }
 
 fclose($inputFileHandle);
@@ -58,6 +63,8 @@ fclose($inputFileHandle);
 // Generate and print out receipt
 try {
     $receipt->generate();
+} catch (ProductException $e){
+    $cli->error($e);
 } catch (GeneratorException $e){
     $cli->error($e);
 }
